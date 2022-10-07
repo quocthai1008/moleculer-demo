@@ -1,22 +1,20 @@
 declare const _default: {
     name: string;
     actions: {
-        create: {
+        findAll: {
+            rest: {
+                method: string;
+                path: string;
+            };
+            handler(): Promise<any>;
+        };
+        findOne: {
             rest: {
                 method: string;
                 path: string;
             };
             params: {
-                name: string;
-                age: string;
-                address: string;
-            };
-            handler(context: any): Promise<string>;
-        };
-        findAll: {
-            rest: {
-                method: string;
-                path: string;
+                _id: string;
             };
             handler(context: any): Promise<any>;
         };

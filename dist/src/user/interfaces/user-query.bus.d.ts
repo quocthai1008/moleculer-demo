@@ -1,4 +1,3 @@
-import { BusFactory } from "../../../interfaces/bus-factory.interface";
-export declare class UserQueryBus extends BusFactory {
+export declare class UserQueryBus {
     exec(query: string, dto: any): Promise<any>;
 }

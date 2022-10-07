@@ -16,9 +16,19 @@ const db_config_1 = require("../../../config/db.config");
 const user_schema_1 = require("../../../schemas/user.schema");
 let UserHandler = UserHandler_1 = class UserHandler {
     constructor() { }
-    async updateOne(name, address) {
+    async delete(_id) {
         const model = await UserHandler_1.getUserModel();
-        await model.updateOne({ name }, { address });
+        await model.deleteOne({ _id });
+        return "Delete user successfully";
+    }
+    async findOne(_id) {
+        const model = await UserHandler_1.getUserModel();
+        const user = await model.findById(_id);
+        return user;
+    }
+    async update(_id, name, age, address) {
+        const model = await UserHandler_1.getUserModel();
+        await model.updateOne({ _id }, { name, age, address });
         return "Update user successfully";
     }
     static async getUserModel() {

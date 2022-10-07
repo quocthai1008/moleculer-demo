@@ -1,11 +1,12 @@
+import { ICommand } from "src/user/interfaces/command.interface";
 import { UserHandler } from "../../infrastructure/user.handler";
 import { CreateUserCommand } from "./create-user.command";
 
-export class CreateUserHandler {
-	constructor() {}
+export class CreateUserHandler implements ICommand {
+	constructor(readonly command: CreateUserCommand) {}
 
-	async execute(command: CreateUserCommand) {
-		const { name, age, address } = command;
+	public async execute(): Promise<string> {
+		const { name, age, address } = this.command;
 
 		const user = new UserHandler();
 

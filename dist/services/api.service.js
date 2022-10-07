@@ -1,5 +1,6 @@
 "use strict";
 const db_config_1 = require("../config/db.config");
+const config_1 = require("@nestjs/config");
 const ApiGateway = require("moleculer-web");
 module.exports = {
     name: "api",
@@ -44,6 +45,7 @@ module.exports = {
     },
     actions: {},
     started() {
+        config_1.ConfigModule.forRoot();
         (async () => {
             await db_config_1.DbConfig.connectDb();
         })();

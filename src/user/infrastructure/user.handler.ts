@@ -9,10 +9,26 @@ export class UserHandler implements UserRepository {
 	private static userModel: mongoose.Model<User>;
 
 	constructor() {}
-
-	public async updateOne(name: string, address: string): Promise<string> {
+	public async delete(_id: mongoose.Types.ObjectId): Promise<string> {
 		const model = await UserHandler.getUserModel();
-		await model.updateOne({ name }, { address });
+		await model.deleteOne({ _id });
+		return "Delete user successfully";
+	}
+
+	public async findOne(_id: mongoose.Types.ObjectId): Promise<User> {
+		const model = await UserHandler.getUserModel();
+		const user = await model.findById(_id);
+		return user;
+	}
+
+	public async update(
+		_id: mongoose.Types.ObjectId,
+		name: string,
+		age: number,
+		address: string
+	): Promise<string> {
+		const model = await UserHandler.getUserModel();
+		await model.updateOne({ _id }, { name, age, address });
 		return "Update user successfully";
 	}
 

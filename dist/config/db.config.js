@@ -6,7 +6,7 @@ class DbConfig {
     static async connectDb() {
         return new Promise((resolve, reject) => {
             if (!DbConfig.connection) {
-                mongoose_1.default.createConnection("mongodb+srv://thai1008:thai123@cluster0.f2zvnui.mongodb.net/test", {}, (err, connection) => {
+                mongoose_1.default.createConnection(process.env.CONNECTION_STRING || "", {}, (err, connection) => {
                     if (err) {
                         reject(err);
                     }
@@ -21,5 +21,4 @@ class DbConfig {
     }
 }
 exports.DbConfig = DbConfig;
-DbConfig.connection = undefined;
 //# sourceMappingURL=db.config.js.map
