@@ -1,54 +1,95 @@
 "use strict";
-const db_config_1 = require("../config/db.config");
-const config_1 = require("@nestjs/config");
+Object.defineProperty(exports, "__esModule", { value: true });
+const moleculer_1 = require("moleculer");
+const core_1 = require("@nestjs/core");
+const app_module_1 = require("./app.module");
 const ApiGateway = require("moleculer-web");
-module.exports = {
-    name: "api",
-    mixins: [ApiGateway],
-    settings: {
-        port: process.env.PORT || 3000,
-        ip: "0.0.0.0",
-        settings: {},
-        use: [],
-        routes: [
-            {
-                path: "/api",
-                whitelist: ["**"],
+class APIService extends moleculer_1.Service {
+    constructor(broker) {
+        super(broker);
+        this.parseServiceSchema({
+            name: "api",
+            mixins: [ApiGateway],
+            settings: {
+                port: process.env.PORT || 3000,
+                ip: "0.0.0.0",
+                settings: {},
                 use: [],
-                mergeParams: true,
-                authentication: false,
-                authorization: false,
-                autoAliases: true,
-                aliases: {},
-                callingOptions: {},
-                bodyParsers: {
-                    json: {
-                        strict: false,
-                        limit: "1MB",
+                routes: [
+                    {
+                        path: "/api",
+                        whitelist: ["user.*"],
+                        mergeParams: true,
+                        authentication: false,
+                        authorization: true,
+                        autoAliases: true,
+                        callingOptions: {},
+                        bodyParsers: {
+                            json: {
+                                strict: false,
+                                limit: "1MB",
+                            },
+                            urlencoded: {
+                                extended: true,
+                                limit: "1MB",
+                            },
+                        },
+                        mappingPolicy: "all",
+                        logging: true,
                     },
-                    urlencoded: {
-                        extended: true,
-                        limit: "1MB",
+                    {
+                        path: "/auth",
+                        whitelist: ["account.register"],
+                        mergeParams: true,
+                        authentication: false,
+                        authorization: false,
+                        autoAliases: true,
+                        callingOptions: {},
+                        bodyParsers: {
+                            json: {
+                                strict: false,
+                                limit: "1MB",
+                            },
+                            urlencoded: {
+                                extended: true,
+                                limit: "1MB",
+                            },
+                        },
+                        mappingPolicy: "all",
+                        logging: true,
                     },
+                ],
+                log4XXResponses: false,
+                logRequestParams: null,
+                logResponseData: null,
+                assets: {
+                    folder: "public",
                 },
-                mappingPolicy: "all",
-                logging: true,
             },
-        ],
-        log4XXResponses: false,
-        logRequestParams: null,
-        logResponseData: null,
-        assets: {
-            folder: "public",
-            options: {},
-        },
-    },
-    actions: {},
-    started() {
-        config_1.ConfigModule.forRoot();
-        (async () => {
-            await db_config_1.DbConfig.connectDb();
-        })();
-    },
-};
+            methods: {
+                authorize(ctx, route, req, res) {
+                    let auth = req.headers["authorization"];
+                    if (auth && auth.startsWith("Bearer")) {
+                        let token = auth.slice(7);
+                        if (token == "123456") {
+                            ctx.meta.user = { id: 1, name: "John Doe" };
+                            return Promise.resolve(ctx);
+                        }
+                        else {
+                            return Promise.reject("Token invalid");
+                        }
+                    }
+                    else {
+                        return Promise.reject("No token");
+                    }
+                },
+            },
+            started: this.serviceStart,
+        });
+    }
+    async serviceStart() {
+        await core_1.NestFactory.create(app_module_1.AppModule);
+    }
+}
+exports.default = APIService;
 //# sourceMappingURL=api.service.js.map
