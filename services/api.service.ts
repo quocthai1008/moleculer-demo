@@ -2,8 +2,7 @@ import { Service, ServiceBroker } from "moleculer";
 
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
-
-const ApiGateway = require("moleculer-web");
+import * as ApiGateway from "moleculer-web";
 
 class APIService extends Service {
 	constructor(broker: ServiceBroker) {
@@ -19,24 +18,16 @@ class APIService extends Service {
 				// Exposed IP
 				ip: "0.0.0.0",
 
-				settings: {},
-				// Global Express middlewares. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Middlewares
-
-				use: [],
-
 				routes: [
 					{
 						path: "/api",
 
-						whitelist: [""],
+						whitelist: ["**"],
 
-						// Enable/disable parameter merging method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Disable-merging
 						mergeParams: true,
 
-						// Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
 						authentication: false,
 
-						// Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
 						authorization: true,
 
 						autoAliases: true,
@@ -54,27 +45,19 @@ class APIService extends Service {
 							},
 						},
 
-						mappingPolicy: "all", // Available values: "all", "restrict"
+						mappingPolicy: "all",
 
 						logging: true,
 					},
 					{
 						path: "/auth",
 
-						whitelist: ["account.register"],
+						whitelist: ["account.register", "account.login"],
 
-						// Enable/disable parameter merging method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Disable-merging
 						mergeParams: true,
-
-						// Enable authentication. Implement the logic into `authenticate` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authentication
 						authentication: false,
-
-						// Enable authorization. Implement the logic into `authorize` method. More info: https://moleculer.services/docs/0.14/moleculer-web.html#Authorization
 						authorization: false,
-
 						autoAliases: true,
-
-						callingOptions: {},
 
 						bodyParsers: {
 							json: {
@@ -87,8 +70,7 @@ class APIService extends Service {
 							},
 						},
 
-						mappingPolicy: "all", // Available values: "all", "restrict"
-
+						mappingPolicy: "all",
 						logging: true,
 					},
 				],
@@ -102,32 +84,28 @@ class APIService extends Service {
 			},
 
 			methods: {
-				// authorize(ctx, route, req, res) {
-				// 	// Read the token from header
-				// 	let auth = req.headers["authorization"];
-				// 	if (auth && auth.startsWith("Bearer")) {
-				// 		let token = auth.slice(7);
-				// 		// Check the token
-				// 		if (token == "123456") {
-				// 			// Set the authorized user entity to `ctx.meta`
-				// 			ctx.meta.user = { id: 1, name: "John Doe" };
-				// 			return Promise.resolve(ctx);
-				// 		} else {
-				// 			// Invalid token
-				// 			return Promise.reject("Token invalid");
-				// 		}
-				// 	} else {
-				// 		// No token
-				// 		return Promise.reject("No token");
-				// 	}
-				// },
+				async authorize(ctx, route, req, res) {
+					let auth = req.headers["authorization"];
+					if (auth && auth.startsWith("Bearer")) {
+						let token = auth.slice(7);
+
+						const payload = await ctx.call("account.verifyToken", {
+							token,
+						});
+
+						ctx.meta.user = payload;
+						return Promise.resolve(ctx);
+					} else {
+						return Promise.reject("No token");
+					}
+				},
 			},
 
 			started: this.serviceStart,
 		});
 	}
 
-	async serviceStart() {
+	private async serviceStart() {
 		await NestFactory.create(AppModule);
 	}
 }

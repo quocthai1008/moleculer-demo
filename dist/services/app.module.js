@@ -8,18 +8,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
-const mongoose_1 = require("@nestjs/mongoose");
 const config_1 = require("@nestjs/config");
-const account_module_1 = require("../src/account/account.module");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [
-            config_1.ConfigModule.forRoot(),
-            mongoose_1.MongooseModule.forRoot(process.env.CONNECTION_STRING),
-            account_module_1.AccountModule,
-        ],
+        imports: [config_1.ConfigModule.forRoot()],
     })
 ], AppModule);
 exports.AppModule = AppModule;

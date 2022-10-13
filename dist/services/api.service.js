@@ -13,12 +13,10 @@ class APIService extends moleculer_1.Service {
             settings: {
                 port: process.env.PORT || 3000,
                 ip: "0.0.0.0",
-                settings: {},
-                use: [],
                 routes: [
                     {
                         path: "/api",
-                        whitelist: ["user.*"],
+                        whitelist: ["**"],
                         mergeParams: true,
                         authentication: false,
                         authorization: true,
@@ -39,12 +37,11 @@ class APIService extends moleculer_1.Service {
                     },
                     {
                         path: "/auth",
-                        whitelist: ["account.register"],
+                        whitelist: ["account.register", "account.login"],
                         mergeParams: true,
                         authentication: false,
                         authorization: false,
                         autoAliases: true,
-                        callingOptions: {},
                         bodyParsers: {
                             json: {
                                 strict: false,
@@ -67,17 +64,15 @@ class APIService extends moleculer_1.Service {
                 },
             },
             methods: {
-                authorize(ctx, route, req, res) {
+                async authorize(ctx, route, req, res) {
                     let auth = req.headers["authorization"];
                     if (auth && auth.startsWith("Bearer")) {
                         let token = auth.slice(7);
-                        if (token == "123456") {
-                            ctx.meta.user = { id: 1, name: "John Doe" };
-                            return Promise.resolve(ctx);
-                        }
-                        else {
-                            return Promise.reject("Token invalid");
-                        }
+                        const payload = await ctx.call("account.verifyToken", {
+                            token,
+                        });
+                        ctx.meta.user = payload;
+                        return Promise.resolve(ctx);
                     }
                     else {
                         return Promise.reject("No token");
